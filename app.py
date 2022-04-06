@@ -7,7 +7,6 @@ import sys
 import shutil
 import mercantile
 import warnings
-import math
 
 
 # Import API key from .env file
