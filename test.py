@@ -1,7 +1,7 @@
-from os import listdir
+import PIL
+import mercantile
 
-for dir_name in ['elevation_images', 'satellite_images']:
-            img_names = []
-            for file in listdir(f'./{dir_name}'):
-                img_names.append(f'{dir_name}/{file}')
-            print(img_names)
+x = mercantile.tile(1, 2, 3)
+
+
+print(PIL)
