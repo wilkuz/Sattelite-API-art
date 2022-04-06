@@ -1,4 +1,4 @@
-.env
+keys.env
 /composite_images
 /elevation_images
 /satellite_images
