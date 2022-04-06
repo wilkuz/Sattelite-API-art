@@ -30,24 +30,24 @@ def createTiles(x_tile_range, y_tile_range):
     for i,x in enumerate(range(x_tile_range[0],x_tile_range[1]+1)):
         for j,y in enumerate(range(y_tile_range[0],y_tile_range[1]+1)):
 
-            # Create request for image tiles
-            mbTerrainURL = f"https://api.mapbox.com/v4/mapbox.terrain-rgb/{str(z)}/{str(x)}/{str(y)}@2x.pngraw?access_token={mbAPIKey}"
-            response = requests.get(mbTerrainURL, stream=True)
+            # Create request for elevation data image tiles
+            # mbTerrainURL = f"https://api.mapbox.com/v4/mapbox.terrain-rgb/{str(z)}/{str(x)}/{str(y)}@2x.pngraw?access_token={mbAPIKey}"
+            # response = requests.get(mbTerrainURL, stream=True)
 
-            # Write the raw content to img
-            with open(f'./elevation_images/{str(i)}.{str(j)}.png', "wb") as file:
-                response.raw.decode_content = True
-                shutil.copyfileobj(response.raw, file)
-
-
-            # # Create request for satellite elevation data
-            # mbSatteliteURL = f"https://api.mapbox.com/v4/mapbox.satellite/{str(z)}/{str(x)}/{str(y)}@2x.pngraw?access_token={mbAPIKey}"
-            # response = requests.get(mbSatteliteURL, stream=True)
-
-            # # Write raw content
-            # with open(f'./satellite_images/{str(i)}.{str(j)}.png', "wb") as file:
+            # # Write the raw content to img
+            # with open(f'./elevation_images/{str(i)}.{str(j)}.png', "wb") as file:
             #     response.raw.decode_content = True
             #     shutil.copyfileobj(response.raw, file)
+
+
+            # # Create request for satellite image
+            mbSatteliteURL = f"https://api.mapbox.com/v4/mapbox.satellite/{str(z)}/{str(x)}/{str(y)}@2x.pngraw?access_token={mbAPIKey}"
+            response = requests.get(mbSatteliteURL, stream=True)
+
+            # Write raw content
+            with open(f'./satellite_images/{str(i)}.{str(j)}.png', "wb") as file:
+                response.raw.decode_content = True
+                shutil.copyfileobj(response.raw, file)
 
 
 def composeImages(x_tiles, y_tiles, lat_lng):
@@ -57,13 +57,14 @@ def composeImages(x_tiles, y_tiles, lat_lng):
                 img_names.append(f'{dir_name}/{file}')
             
             # Get raster size
-            images = [PILImage.open(x) for x in img_names]
-            raster_length_width = x_tiles[1] - x_tiles[0]
-            raster_length_height = y_tiles[1] - y_tiles[0]
+            
+            raster_length_width = x_tiles[1] - x_tiles[0] + 1
+            raster_length_height = y_tiles[1] - y_tiles[0] + 1
             raster_length_width = max(1,raster_length_width)
             raster_length_height = max(1,raster_length_height)
 
             # calculate the total size of composite image
+            images = [PILImage.open(x) for x in img_names]
             raster_width, raster_height = images[0].size
             total_width = raster_width*raster_length_width
             total_height = raster_height*raster_length_height
@@ -75,14 +76,15 @@ def composeImages(x_tiles, y_tiles, lat_lng):
             for i in range(0,raster_length_width):
                 x_offset = 0
                 for j in range(0,raster_length_height):
-                    temp = PILImage.open(f"./{dir_name}/{str(i)}.{str(j)}.png")
-                    composite.paste(temp, (y_offset, x_offset))
-                    # For every raster in the first column, the next image pasted should be offset by the raster height
-                    x_offset += raster_height
-                # For every column finished, the next Y should be offset by raster width
-                y_offset += raster_width
+                    print(raster_length_width, raster_length_height)
+            #         temp = PILImage.open(f"./{dir_name}/{str(i)}.{str(j)}.png")
+            #         composite.paste(temp, (y_offset, x_offset))
+            #         # For every raster in the first column, the next image pasted should be offset by the raster height
+            #         x_offset += raster_height
+            #     # For every column finished, the next Y should be offset by raster width
+            #     y_offset += raster_width
             
-            composite.save(f"./composite_images/{dir_name}-{lat_lng[0]}-{lat_lng[1]}.png")
+            # composite.save(f"./composite_images/{dir_name}-{lat_lng[0]}-{lat_lng[1]}.png")
 
 
 
@@ -104,9 +106,9 @@ if __name__ == "__main__":
         x_tile_range =[tl_tiles.x,br_tiles.x]
         y_tile_range = [tl_tiles.y,br_tiles.y]
 
-        print('Creating images...')
-        createTiles(x_tile_range, y_tile_range)
-        print('Got tiles from API.')
+        # print('Creating images...')
+        # createTiles(x_tile_range, y_tile_range)
+        # print('Got tiles from API.')
 
         print('Composing images...')
         composeImages(x_tile_range, y_tile_range, lat_lng)
