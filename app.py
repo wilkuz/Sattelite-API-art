@@ -18,9 +18,9 @@ def initVariables(variables):
     lat_lng = []
 
     for variable in variables:
-        if variable == sys.argv[1]: lat_lng.append(float(variable))
-        if variable == sys.argv[2]: lat_lng.append(float(variable))
-        if variable == sys.argv[3]: delta = float(variable)
+        if variable == sys.argv[1]: lat_lng.append(float(variable)) # lat
+        if variable == sys.argv[2]: lat_lng.append(float(variable)) # long
+        if variable == sys.argv[3]: delta = float(variable) # delta
 
     return delta, lat_lng
 
@@ -40,7 +40,7 @@ def createTiles(x_tile_range, y_tile_range):
             #     shutil.copyfileobj(response.raw, file)
 
 
-            # # Create request for satellite image
+            # Create request for satellite elevation data image
             mbSatteliteURL = f"https://api.mapbox.com/v4/mapbox.satellite/{str(z)}/{str(x)}/{str(y)}@2x.pngraw?access_token={mbAPIKey}"
             response = requests.get(mbSatteliteURL, stream=True)
 
@@ -54,7 +54,8 @@ def composeImages(x_tiles, y_tiles, lat_lng):
     for dir_name in ['satellite_images']:
             img_names = []
             for file in listdir(f'./{dir_name}'):
-                img_names.append(f'{dir_name}/{file}')
+                if file.endswith('.png'):
+                    img_names.append(f'{dir_name}/{file}')
             
             # Get raster size
             
@@ -77,14 +78,14 @@ def composeImages(x_tiles, y_tiles, lat_lng):
                 x_offset = 0
                 for j in range(0,raster_length_height):
                     print(raster_length_width, raster_length_height)
-            #         temp = PILImage.open(f"./{dir_name}/{str(i)}.{str(j)}.png")
-            #         composite.paste(temp, (y_offset, x_offset))
-            #         # For every raster in the first column, the next image pasted should be offset by the raster height
-            #         x_offset += raster_height
-            #     # For every column finished, the next Y should be offset by raster width
-            #     y_offset += raster_width
+                    temp = PILImage.open(f"./{dir_name}/{str(i)}.{str(j)}.png")
+                    composite.paste(temp, (y_offset, x_offset))
+                    # For every raster in the first column, the next image pasted should be offset by the raster height
+                    x_offset += raster_height
+                # For every column finished, the next Y should be offset by raster width
+                y_offset += raster_width
             
-            # composite.save(f"./composite_images/{dir_name}-{lat_lng[0]}-{lat_lng[1]}.png")
+            composite.save(f"./composite_images/{dir_name}-{lat_lng[0]}-{lat_lng[1]}.png")
 
 
 
@@ -96,8 +97,8 @@ if __name__ == "__main__":
         print('running')
 
         # converting lat_lng to tilesets
-        topLeft = [lat_lng[0]+delta, lat_lng[1]-delta]
-        bottomRight = [lat_lng[0]-delta, lat_lng[1]+delta]
+        topLeft = [lat_lng[0]+delta, lat_lng[1]-delta*2]
+        bottomRight = [lat_lng[0]-delta, lat_lng[1]+delta*2]
         z = 15 # Max resolution/zoom
 
         tl_tiles = mercantile.tile(topLeft[1],topLeft[0],z)
@@ -106,9 +107,9 @@ if __name__ == "__main__":
         x_tile_range =[tl_tiles.x,br_tiles.x]
         y_tile_range = [tl_tiles.y,br_tiles.y]
 
-        # print('Creating images...')
-        # createTiles(x_tile_range, y_tile_range)
-        # print('Got tiles from API.')
+        print('Creating images...')
+        createTiles(x_tile_range, y_tile_range)
+        print('Got tiles from API.')
 
         print('Composing images...')
         composeImages(x_tile_range, y_tile_range, lat_lng)
