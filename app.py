@@ -2,10 +2,11 @@ from pip._vendor import requests
 from os import listdir
 from os.path import isfile, join
 from dotenv import dotenv_values
+from PIL import Image as PILImage
 import sys
 import shutil
 import mercantile
-from PIL import Image as PILImage
+import warnings
 import math
 
 
@@ -122,6 +123,7 @@ if __name__ == "__main__":
     else:
         print('Please provide arguments.')
         print('Usage: python app.py <lat> <long> <delta>')
+        warnings.warn('NOTE: the third argument (delta) should be around 0.02 for close up images.')
         sys.exit()
 
     
