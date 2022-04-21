@@ -58,7 +58,6 @@ def composeImages(x_tiles, y_tiles, lat_lng):
                     img_names.append(f'{dir_name}/{file}')
             
             # Get raster size
-            
             raster_length_width = x_tiles[1] - x_tiles[0] + 1
             raster_length_height = y_tiles[1] - y_tiles[0] + 1
             raster_length_width = max(1,raster_length_width)
@@ -99,7 +98,7 @@ if __name__ == "__main__":
         # converting lat_lng to tilesets
         topLeft = [lat_lng[0]+delta, lat_lng[1]-delta*2]
         bottomRight = [lat_lng[0]-delta, lat_lng[1]+delta*2]
-        z = 15 # Max resolution/zoom
+        z = 15 # Needs to be 0-15 where 15 is max resolution/zoom
 
         tl_tiles = mercantile.tile(topLeft[1],topLeft[0],z)
         br_tiles = mercantile.tile(bottomRight[1],bottomRight[0],z)
@@ -122,7 +121,6 @@ if __name__ == "__main__":
     else:
         print('Please provide arguments.')
         print('Usage: python app.py <lat> <long> <delta>')
-        warnings.warn('NOTE: the third argument (delta) should be around 0.02 for close up images.')
         sys.exit()
 
     
